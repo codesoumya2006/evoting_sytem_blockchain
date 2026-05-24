@@ -625,11 +625,8 @@ async function sendOtpToVoter(voterId) {
       );
     }
 
-    const txt =
-      await res.text();
-
-    currentOtp =
-      txt.match(/\d{6}/)?.[0];
+    const data = await res.json();
+    currentOtp = data.otp;
 
     goStep(2);
 
@@ -718,7 +715,7 @@ async function goStep3() {
       (
         data?.success === true ||
         data?.verified === true ||
-        data?.message === "OTP verified"
+        data?.message === "OTP verified successfully"
       );
 
     if (!success) {
