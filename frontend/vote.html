@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CivicChain — Cast Your Vote</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <style>
   :root {
     --bg: #030712;
@@ -401,7 +402,7 @@
 <script>
 // Replace this with how your separate login page stores the ID
 const voterId = sessionStorage.getItem('voterVid') || "TEST_VOTER";
-const API_BASE = "https://civicchain-1.onrender.com/api";
+const API_BASE = CONFIG.BACKEND_URL;
 
 // Redirect if no voter session
 if (!sessionStorage.getItem('voterVid')) {

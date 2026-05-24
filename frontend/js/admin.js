@@ -1,4 +1,4 @@
-const API_BASE = "https://civicchain-1.onrender.com/api";
+const API_BASE = CONFIG.BACKEND_URL;
 const CC_KEYS = { adminSession: 'cc_admin_session' };
 
 let modalMode = 'add';

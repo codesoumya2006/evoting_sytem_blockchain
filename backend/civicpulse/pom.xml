@@ -52,12 +52,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Web -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
         <!-- Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -104,6 +98,7 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+
                 </configuration>
             </plugin>
 

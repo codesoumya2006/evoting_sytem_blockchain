@@ -21,11 +21,11 @@ public class VoteBlock {
     private boolean sealed = false;
 
     // Store hashed voter identities (NOT raw voterId)
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> voterHashes = new ArrayList<>();
 
     // Store candidate votes inside block
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> candidateIds = new ArrayList<>();
 
     // getters & setters

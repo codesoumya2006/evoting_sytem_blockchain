@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CivicChain — Voter Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
 <style>
   :root{--bg:#030712;--surface:#0d1117;--border:#1e2936;--accent:#00e5ff;--text:#e2e8f0;--muted:#64748b;--success:#10b981;--error:#ef4444;--warning:#f59e0b;}
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -103,6 +107,13 @@
   .mm-btn:hover{background:rgba(246,133,27,.07);border-color:rgba(246,133,27,.6);}
   .divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;}
   .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  /* LIVENESS */
+  #liveness-canvas{border:1px solid rgba(0,229,255,.3);border-radius:8px;display:block;margin:0 auto;}
+  #liveness-video{display:none;}
+  #liveness-timer{font-family:'JetBrains Mono',monospace;font-size:2.5rem;color:var(--accent);text-align:center;margin:12px 0;}
+  #liveness-instruction{text-align:center;font-size:.95rem;font-weight:600;color:var(--accent);margin-bottom:8px;animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  #liveness-status{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-top:6px;min-height:20px;}
   @media(max-width:900px){body{flex-direction:column;overflow:auto;}.left-panel{width:100%;min-height:auto;padding:24px;}.right-panel{padding:32px 24px;}.badge{display:none;}}
 </style>
 </head>
@@ -152,6 +163,10 @@
       <div class="step-ind" id="si2"><div class="step-circle">2</div><span>OTP</span></div>
       <div class="step-line" id="sl23"></div>
       <div class="step-ind" id="si3"><div class="step-circle">3</div><span>BIOMETRIC</span></div>
+      <div class="step-line" id="sl34"></div>
+      <div class="step-ind" id="si4"><div class="step-circle">4</div><span>LIVENESS</span></div>
+      <div class="step-line" id="sl45"></div>
+      <div class="step-ind" id="si5"><div class="step-circle">5</div><span>WALLET</span></div>
     </div>
 
     <!-- ALERT -->
@@ -223,11 +238,40 @@
       <button class="btn btn-outline" onclick="skipBiometric()" style="display: none;" id="skipBtn">⏭️ Skip (Demo)</button>
       <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
     </div>
+
+    <!-- STEP 4: Liveness Check -->
+    <div class="form-step" id="step-4">
+      <div style="text-align:center;">
+        <p class="form-title" style="font-size:1.4rem;">LIVENESS CHECK</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:16px;">Please blink your eyes when instructed</p>
+        <video id="liveness-video" autoplay playsinline muted></video>
+        <canvas id="liveness-canvas" width="320" height="240"></canvas>
+        <div id="liveness-timer">10</div>
+        <div id="liveness-instruction">👁️ BLINK NOW</div>
+        <div id="liveness-status"></div>
+      </div>
+    </div>
+
+    <!-- STEP 5: MetaMask Wallet -->
+    <div class="form-step" id="step-5">
+      <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;font-weight:400">Connect your MetaMask wallet to authorize your voting transaction on the blockchain.</p>
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:3rem;margin-bottom:10px;">🦊</div>
+        <p style="font-size:.85rem;color:var(--text);margin-bottom:5px;">MetaMask Wallet</p>
+        <p style="font-size:.72rem;color:var(--muted);">Connect to sign your vote on-chain</p>
+      </div>
+      <button class="mm-btn" onclick="connectWallet()">🦊 Connect MetaMask</button>
+      <div class="wallet-status" id="walletStatus"></div>
+      <div class="divider">OR</div>
+      <button class="btn btn-accent" onclick="proceedToVote()">Proceed to Vote</button>
+      <button class="btn btn-outline" onclick="goStep(4)">← Back</button>
+    </div>
+
   </div>
 </div>
 
 <script>
-const API_BASE = "https://civicchain-1.onrender.com/api";
+const API_BASE = CONFIG.BACKEND_URL;
 // ─────────────────────────────────────────────
 // GLOBAL STATE
 // ─────────────────────────────────────────────
@@ -383,6 +427,12 @@ function showAlert(type, msg) {
 // ─────────────────────────────────────────────
 function goStep(n) {
 
+  // Stop liveness camera when leaving step-4
+  const step4El = document.getElementById('step-4');
+  if (step4El && step4El.classList.contains('active')) {
+    stopLivenessCamera();
+  }
+
   document
     .querySelectorAll(".form-step")
     .forEach(s =>
@@ -420,6 +470,11 @@ function goStep(n) {
         i + 1 < n
       );
     });
+
+  // Start liveness camera when entering step-4
+  if (n === 4) {
+    startLivenessCamera();
+  }
 }
 
 
@@ -797,7 +852,7 @@ async function startBiometricVerification() {
       showAlert("s", "✅ Biometric verified — Access granted");
 
       setTimeout(() => {
-        window.location.href = "vote.html";
+        goStep(4);
       }, 800);
     }
 
@@ -827,7 +882,7 @@ function skipBiometric() {
     sessionStorage.setItem('voterName', verifiedVoter.name || '');
   }
   showAlert("s", "✅ Access granted (demo bypass)");
-  setTimeout(() => { window.location.href = "vote.html"; }, 600);
+  setTimeout(() => { goStep(4); }, 600);
 }
 
 
@@ -940,6 +995,173 @@ document.addEventListener(
     );
   }
 );
+
+// ─────────────────────────────────────────────
+// LIVENESS CHECK (STEP 4)
+// ─────────────────────────────────────────────
+let blinkDetected = false;
+let consecutiveClosedFrames = 0;
+let livenessInterval = null;
+let livenessCamera = null;
+let livenessFaceMesh = null;
+
+const LEFT_EYE = [362, 385, 387, 263, 373, 380];
+const RIGHT_EYE = [33, 160, 158, 133, 153, 144];
+
+function calculateEAR(landmarks, eyeIndices) {
+  const p1 = { x: landmarks[eyeIndices[0]].x, y: landmarks[eyeIndices[0]].y };
+  const p2 = { x: landmarks[eyeIndices[1]].x, y: landmarks[eyeIndices[1]].y };
+  const p3 = { x: landmarks[eyeIndices[2]].x, y: landmarks[eyeIndices[2]].y };
+  const p4 = { x: landmarks[eyeIndices[3]].x, y: landmarks[eyeIndices[3]].y };
+  const p5 = { x: landmarks[eyeIndices[4]].x, y: landmarks[eyeIndices[4]].y };
+  const p6 = { x: landmarks[eyeIndices[5]].x, y: landmarks[eyeIndices[5]].y };
+  const v1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
+  const v2 = Math.hypot(p3.x - p5.x, p3.y - p5.y);
+  const h = Math.hypot(p1.x - p4.x, p1.y - p4.y);
+  return (v1 + v2) / (2.0 * h);
+}
+
+function startLivenessCamera() {
+  blinkDetected = false;
+  consecutiveClosedFrames = 0;
+  document.getElementById('liveness-timer').textContent = '10';
+  document.getElementById('liveness-instruction').textContent = '👁️ BLINK NOW';
+  document.getElementById('liveness-instruction').style.animation = 'pulse 1.5s infinite';
+  const statusEl = document.getElementById('liveness-status');
+  statusEl.textContent = '';
+  statusEl.style.color = '';
+
+  let seconds = 10;
+  livenessInterval = setInterval(() => {
+    seconds--;
+    document.getElementById('liveness-timer').textContent = seconds;
+    if (seconds <= 0 && !blinkDetected) {
+      livenessFail();
+    }
+  }, 1000);
+
+  try {
+    livenessFaceMesh = new FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    livenessFaceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+
+    const canvas = document.getElementById('liveness-canvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('liveness-video');
+
+    livenessFaceMesh.onResults((results) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+        const landmarks = results.multiFaceLandmarks[0];
+        const leftEAR = calculateEAR(landmarks, LEFT_EYE);
+        const rightEAR = calculateEAR(landmarks, RIGHT_EYE);
+        const avgEAR = (leftEAR + rightEAR) / 2;
+
+        if (avgEAR < 0.15) {
+          consecutiveClosedFrames++;
+        } else {
+          if (consecutiveClosedFrames >= 2) {
+            blinkDetected = true;
+            livenessPass();
+            return;
+          }
+          consecutiveClosedFrames = 0;
+        }
+      } else {
+        document.getElementById('liveness-status').textContent = 'No face detected';
+      }
+    });
+
+    livenessCamera = new Camera(video, {
+      onFrame: async () => {
+        await livenessFaceMesh.send({ image: video });
+      },
+      width: 320,
+      height: 240
+    });
+    livenessCamera.start();
+  } catch (err) {
+    console.error('Camera error:', err);
+    document.getElementById('liveness-status').textContent = '❌ Camera error';
+  }
+}
+
+function stopLivenessCamera() {
+  if (livenessInterval) {
+    clearInterval(livenessInterval);
+    livenessInterval = null;
+  }
+  if (livenessCamera) {
+    try { livenessCamera.stop(); } catch (e) { /* ignore */ }
+    livenessCamera = null;
+  }
+  const video = document.getElementById('liveness-video');
+  if (video && video.srcObject) {
+    try {
+      video.srcObject.getTracks().forEach(t => t.stop());
+    } catch (e) { /* ignore */ }
+    video.srcObject = null;
+  }
+  livenessFaceMesh = null;
+}
+
+function livenessPass() {
+  stopLivenessCamera();
+  const statusEl = document.getElementById('liveness-status');
+  statusEl.textContent = '✅ LIVENESS VERIFIED';
+  statusEl.style.color = '#10b981';
+  document.getElementById('liveness-instruction').textContent = '✅ Verified';
+  document.getElementById('liveness-instruction').style.animation = 'none';
+  setTimeout(() => goStep(5), 1500);
+}
+
+function livenessFail() {
+  stopLivenessCamera();
+  const statusEl = document.getElementById('liveness-status');
+  statusEl.textContent = '❌ LIVENESS FAILED — Redirecting...';
+  statusEl.style.color = '#ef4444';
+  setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+}
+
+// ─────────────────────────────────────────────
+// WALLET (STEP 5)
+// ─────────────────────────────────────────────
+async function connectWallet() {
+  if (typeof window.ethereum === 'undefined') {
+    showAlert('e', '❌ MetaMask not detected. Please install MetaMask.');
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const statusEl = document.getElementById('walletStatus');
+    const addr = accounts[0];
+    statusEl.textContent = `✅ Connected: ${addr.substring(0,6)}...${addr.substring(38)}`;
+    statusEl.classList.add('show');
+    showAlert('s', '✅ Wallet connected successfully');
+  } catch (err) {
+    showAlert('e', '❌ Wallet connection failed or rejected');
+  }
+}
+
+function proceedToVote() {
+  if (verifiedVoter && verifiedVoter.voterId) {
+    sessionStorage.setItem('voterVid', verifiedVoter.voterId);
+    sessionStorage.setItem('voterName', verifiedVoter.name || '');
+  }
+  window.location.href = 'vote.html';
+}
 </script>
 </body>
 </html>
