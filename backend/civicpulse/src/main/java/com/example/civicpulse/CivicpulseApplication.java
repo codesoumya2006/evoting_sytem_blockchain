@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan("com.example.civicpulse.model")
-@EnableJpaRepositories("com.example.civicpulse.repository")
+@EnableJpaRepositories("com.example.civicpulse.repo")
 public class CivicpulseApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CivicpulseApplication.class, args);
