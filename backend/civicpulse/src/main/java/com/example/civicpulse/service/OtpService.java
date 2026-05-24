@@ -18,26 +18,27 @@ public class OtpService {
     private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
     private final SecureRandom random = new SecureRandom();
 
-    // Pulls your secret API key securely from Render Environment Variables
     @Value("${SMS_API_KEY:}")
     private String smsApiKey;
 
-    public String generateAndSendOtp(String mobileNumber) {
-        // 1. Clean the mobile number (Removes any accidental spaces, +91, or 0 prefixes)
+    private String cleanMobile(String mobileNumber) {
         String cleanMobile = mobileNumber.trim().replaceAll("\\s+", "");
         if (cleanMobile.startsWith("+91")) {
             cleanMobile = cleanMobile.substring(3);
         } else if (cleanMobile.startsWith("0")) {
             cleanMobile = cleanMobile.substring(1);
         }
+        return cleanMobile;
+    }
 
-        // 2. Generate a secure 6-digit numeric OTP
-        String otp = String.format("%06d", random.nextInt(1000000)); 
+    public String generateAndSendOtp(String mobileNumber) {
+        String cleanMobile = cleanMobile(mobileNumber);
+
+        String otp = String.format("%06d", random.nextInt(1000000));
 
         OtpData data = new OtpData(otp, LocalDateTime.now().plusMinutes(5));
         otpStorage.put(cleanMobile, data);
 
-        // 3. Print to Render log as a safe fallback
         System.out.println("🔐 Securely generated OTP for " + cleanMobile + " is: " + otp);
 
         if (smsApiKey == null || smsApiKey.isEmpty()) {
@@ -45,7 +46,6 @@ public class OtpService {
             return otp;
         }
 
-        // 4. Real-Life SMS Gateway API Dispatch (Strict Fast2SMS Route parameters)
         try {
             String urlString = "https://www.fast2sms.com/dev/bulkV2"
                              + "?authorization=" + smsApiKey.trim()
@@ -56,8 +56,6 @@ public class OtpService {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            
-            // Set browser headers so the gateway firewall recognizes the request safely
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
             conn.setRequestProperty("Accept", "application/json");
 
@@ -73,8 +71,6 @@ public class OtpService {
                 System.out.println("🚀 SMS Gateway Response: " + response.toString());
             } else {
                 System.err.println("❌ SMS Gateway HTTP Error Code: " + responseCode);
-                
-                // Read the exact reason the API gateway rejected it
                 if (conn.getErrorStream() != null) {
                     BufferedReader errorIn = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                     String errorLine;
@@ -88,13 +84,11 @@ public class OtpService {
             System.err.println("❌ Failed to reach SMS network gateway: " + e.getMessage());
         }
 
-        return otp; 
+        return otp;
     }
 
     public boolean verifyOtp(String mobileNumber, String inputOtp) {
-        String cleanMobile = mobileNumber.trim().replaceAll("\\s+", "");
-        if (cleanMobile.startsWith("+91")) cleanMobile = cleanMobile.substring(3);
-        if (cleanMobile.startsWith("0")) cleanMobile = cleanMobile.substring(1);
+        String cleanMobile = cleanMobile(mobileNumber);
 
         OtpData data = otpStorage.get(cleanMobile);
 
@@ -106,7 +100,7 @@ public class OtpService {
 
         boolean valid = data.otp.equals(inputOtp.trim());
         if (valid) {
-            otpStorage.remove(cleanMobile); // Securely consume the OTP
+            otpStorage.remove(cleanMobile);
         }
         return valid;
     }
