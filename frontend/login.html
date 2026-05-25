@@ -16,14 +16,12 @@
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
   .cursor{width:12px;height:12px;background:var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:difference;}
   .cursor-ring{width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.4;}
-  /* LOCKED OVERLAY */
   .locked-overlay{position:fixed;inset:0;background:rgba(3,7,18,.97);backdrop-filter:blur(20px);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:40px;}
   .locked-overlay.show{display:flex;}
   .locked-overlay h2{font-size:2rem;font-weight:800;color:var(--error);}
   .locked-overlay p{color:var(--muted);max-width:400px;line-height:1.6;}
   .locked-overlay a{color:var(--accent);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:.8rem;border:1px solid var(--accent);padding:10px 24px;margin-top:8px;display:inline-block;transition:background .2s;}
   .locked-overlay a:hover{background:var(--accent);color:var(--bg);}
-  /* LEFT PANEL */
   .left-panel{width:42%;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:40px;position:relative;overflow:hidden;}
   .left-panel::before{content:'';position:absolute;bottom:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(0,229,255,.06) 0%,transparent 70%);pointer-events:none;}
   .panel-logo{display:flex;align-items:center;gap:10px;font-size:1.1rem;font-weight:800;letter-spacing:-.02em;text-decoration:none;color:var(--text);}
@@ -44,13 +42,11 @@
   .badge-text strong{display:block;color:var(--text);font-size:.8rem;margin-bottom:2px;}
   .badge-text span{color:var(--muted);font-size:.75rem;}
   .panel-footer{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;display:flex;justify-content:space-between;}
-  /* RIGHT PANEL */
   .right-panel{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 40px;position:relative;}
   .form-container{width:100%;max-width:440px;animation:fadeIn .5s ease;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}}
   .form-title{font-size:1.8rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;}
   .form-subtitle{font-size:.82rem;color:var(--muted);font-weight:400;margin-bottom:32px;}
-  /* STEP INDICATOR */
   .steps-indicator{display:flex;align-items:center;gap:0;margin-bottom:28px;}
   .step-ind{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;}
   .step-ind.active{color:var(--accent);}
@@ -60,7 +56,6 @@
   .step-ind.active .step-circle{background:var(--accent);border-color:var(--accent);color:var(--bg);}
   .step-line{flex:1;height:1px;background:var(--border);margin:0 8px;}
   .step-line.done{background:var(--success);}
-  /* FORMS */
   .form-step{display:none;}
   .form-step.active{display:block;animation:stepIn .35s ease;}
   @keyframes stepIn{from{opacity:0;transform:translateX(16px)}}
@@ -76,14 +71,12 @@
   .field-hint{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:5px;}
   .field-error{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--error);margin-top:5px;display:none;}
   .field-error.show{display:block;}
-  /* OTP */
   .otp-group{display:flex;gap:8px;}
   .otp-group input{flex:1;text-align:center;padding:16px 6px;font-size:1.2rem;font-weight:700;letter-spacing:0;}
   .otp-timer{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);text-align:center;margin-top:10px;}
   .otp-timer span{color:var(--warning);}
   .resend-btn{background:none;border:none;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.62rem;cursor:pointer;display:none;text-decoration:underline;}
   .resend-btn.show{display:inline;}
-  /* BUTTONS */
   .btn{width:100%;padding:14px;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.06em;text-transform:uppercase;border:none;cursor:pointer;margin-top:6px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));}
   .btn-accent{background:var(--accent);color:var(--bg);}
   .btn-accent:hover{box-shadow:0 0 30px rgba(0,229,255,.25);transform:translateY(-1px);}
@@ -94,20 +87,17 @@
   .spinner-wrap.show{display:flex;}
   .spinner{width:20px;height:20px;border:2px solid rgba(3,7,18,.15);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg)}}
-  /* ALERT */
   .alert{padding:11px 14px;border-left:3px solid;font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.5;margin-bottom:16px;display:none;border-radius:2px;}
   .alert.show{display:block;}
   .alert-s{border-color:var(--success);background:rgba(16,185,129,.06);color:var(--success);}
   .alert-e{border-color:var(--error);background:rgba(239,68,68,.06);color:var(--error);}
   .alert-i{border-color:var(--accent);background:rgba(0,229,255,.06);color:var(--accent);}
-  /* wallet */
   .wallet-status{display:none;align-items:center;gap:8px;padding:10px 13px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--success);margin-top:10px;border-radius:4px;}
   .wallet-status.show{display:flex;}
   .mm-btn{width:100%;padding:13px;background:transparent;border:1px solid rgba(246,133,27,.35);color:#f6851b;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.08em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,border-color .2s;border-radius:4px;}
   .mm-btn:hover{background:rgba(246,133,27,.07);border-color:rgba(246,133,27,.6);}
   .divider{display:flex;align-items:center;gap:12px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;}
   .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
-  /* LIVENESS */
   #liveness-canvas{border:1px solid rgba(0,229,255,.3);border-radius:8px;display:block;margin:0 auto;}
   #liveness-video{display:none;}
   #liveness-timer{font-family:'JetBrains Mono',monospace;font-size:2.5rem;color:var(--accent);text-align:center;margin:12px 0;}
@@ -121,7 +111,6 @@
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<!-- VOTING CLOSED OVERLAY -->
 <div class="locked-overlay" id="lockedOverlay">
   <div style="font-size:4rem">🔒</div>
   <h2>Voting Is Not Open</h2>
@@ -130,7 +119,6 @@
   <a href="results.html">📊 View Results</a>
 </div>
 
-<!-- LEFT PANEL -->
 <div class="left-panel">
   <a href="index.html" class="panel-logo"><div class="logo-dot"></div>CivicChain</a>
   <div class="top-links">
@@ -150,13 +138,11 @@
   <div class="panel-footer"><span>v2.1.4 — Audited</span><span>SSL/TLS 1.3</span></div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="right-panel">
   <div class="form-container">
     <h1 class="form-title">Voter Login</h1>
     <p class="form-subtitle">Complete all steps to access your ballot</p>
 
-    <!-- STEP INDICATORS -->
     <div class="steps-indicator">
       <div class="step-ind active" id="si1"><div class="step-circle">1</div><span>IDENTITY</span></div>
       <div class="step-line" id="sl12"></div>
@@ -169,10 +155,9 @@
       <div class="step-ind" id="si5"><div class="step-circle">5</div><span>WALLET</span></div>
     </div>
 
-    <!-- ALERT -->
     <div class="alert" id="alert"></div>
 
-    <!-- STEP 1: Identity -->
+    <!-- STEP 1 -->
     <div class="form-step active" id="step-1">
       <div class="field">
         <label class="field-label">Voter ID</label>
@@ -203,11 +188,11 @@
       <button class="btn btn-accent" id="btn1" onclick="goStep2()">Verify Identity & Send OTP</button>
     </div>
 
-    <!-- STEP 2: OTP -->
+    <!-- STEP 2 -->
     <div class="form-step" id="step-2">
       <div class="field">
         <label class="field-label">Enter 6-digit OTP</label>
-        <div class="alert alert-s show" style="margin-bottom: 16px;">✓ OTP sent to your registered phone</div>
+        <div class="alert alert-s show" style="margin-bottom:16px;">✓ OTP sent to your registered phone</div>
         <div class="otp-group" id="otpGroup">
           <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
           <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
@@ -223,23 +208,21 @@
       <button class="btn btn-outline" onclick="goStep(1)">← Back</button>
     </div>
 
-    <!-- STEP 3: Biometric -->
+    <!-- STEP 3 -->
     <div class="form-step" id="step-3">
-      <div class="alert alert-s show" style="margin-bottom: 16px;">✓ Identity and OTP verified successfully</div>
+      <div class="alert alert-s show" style="margin-bottom:16px;">✓ Identity and OTP verified successfully</div>
       <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;font-weight:400">Complete biometric authentication using your device's fingerprint, face recognition, or security key.</p>
-      
-      <div style="text-align: center; padding: 20px 0;">
-        <div style="font-size: 3rem; margin-bottom: 10px;">🔐</div>
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:3rem;margin-bottom:10px;">🔐</div>
         <p style="font-size:.85rem;color:var(--text);margin-bottom:5px;">Fingerprint / Face Recognition</p>
         <p style="font-size:.72rem;color:var(--muted);">Secure WebAuthn biometric authentication</p>
       </div>
-
       <button class="btn btn-accent" id="btn3" onclick="startBiometricVerification()">🔒 Verify Biometric</button>
-      <button class="btn btn-outline" onclick="skipBiometric()" style="display: none;" id="skipBtn">⏭️ Skip (Demo)</button>
+      <button class="btn btn-outline" onclick="skipBiometric()" style="display:none;" id="skipBtn">⏭️ Skip (Demo)</button>
       <button class="btn btn-outline" onclick="goStep(2)">← Back</button>
     </div>
 
-    <!-- STEP 4: Liveness Check -->
+    <!-- STEP 4 -->
     <div class="form-step" id="step-4">
       <div style="text-align:center;">
         <p class="form-title" style="font-size:1.4rem;">LIVENESS CHECK</p>
@@ -252,17 +235,9 @@
       </div>
     </div>
 
-    <!-- STEP 5: MetaMask Wallet -->
+    <!-- STEP 5 -->
     <div class="form-step" id="step-5">
       <p style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:20px;font-weight:400">Connect your MetaMask wallet to authorize your voting transaction on the blockchain.</p>
-      <!-- <div style="text-align:center;padding:20px 0;">
-        <div style="font-size:3rem;margin-bottom:10px;">🦊</div>
-        <p style="font-size:.85rem;color:var(--text);margin-bottom:5px;">MetaMask Wallet</p>
-        <p style="font-size:.72rem;color:var(--muted);">Connect to sign your vote on-chain</p>
-      </div>
-      <button class="mm-btn" onclick="connectWallet()">🦊 Connect MetaMask</button>
-      <div class="wallet-status" id="walletStatus"></div>
-      <div class="divider">OR</div> -->
       <button class="btn btn-accent" onclick="proceedToVote()">Proceed to Vote</button>
       <button class="btn btn-outline" onclick="goStep(4)">← Back</button>
     </div>
@@ -272,525 +247,180 @@
 
 <script>
 const API_BASE = CONFIG.BACKEND_URL;
-// ─────────────────────────────────────────────
-// GLOBAL STATE
-// ─────────────────────────────────────────────
-let votingState = {
-  open: false,
-  expiry: 0,
-  lastFetch: 0
-};
 
+// ── GLOBAL STATE ──
+let votingState = { open: false, expiry: 0, lastFetch: 0 };
 let verifiedVoter = null;
 let currentOtp = null;
 let biometricVerified = false;
 
-
-// ─────────────────────────────────────────────
-// FETCH VOTING STATUS (FIXED)
-// ─────────────────────────────────────────────
+// ── VOTING STATUS ──
 async function fetchVotingStatus() {
-
   try {
-
-    console.log(
-      "📡 Fetching voting status..."
-    );
-
-    const res = await fetch(
-      `${API_BASE}/voting/status`
-    );
-
-    if (!res.ok) {
-
-      throw new Error(
-        `HTTP ${res.status}`
-      );
-    }
-
+    const res = await fetch(`${API_BASE}/voting/status`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-
-    console.log(
-      "🗳️ STATUS RESPONSE:",
-      data
-    );
-
-    // FIXED:
-    // backend returns:
-    // isOpen
-    // expiryMillis
-    // status
-
-    votingState.open =
-      data.isOpen === true ||
-      data.status === "OPEN";
-
-    votingState.expiry =
-      Number(
-        data.expiryMillis || 0
-      );
-
-    votingState.lastFetch =
-      Date.now();
-
-    console.log(
-      "✅ UPDATED STATE:",
-      votingState
-    );
-
+    votingState.open = data.isOpen === true || data.status === "OPEN";
+    votingState.expiry = Number(data.expiryMillis || 0);
+    votingState.lastFetch = Date.now();
   } catch (err) {
-
-    console.error(
-      "❌ Voting status error:",
-      err
-    );
+    console.error("❌ Voting status error:", err);
   }
 }
 
-
-// ─────────────────────────────────────────────
-// CHECK IF VOTING OPEN
-// ─────────────────────────────────────────────
 function isVotingOpen() {
-
   const now = Date.now();
-
-  const open =
-    votingState.open &&
-    (
-      votingState.expiry === 0 ||
-      votingState.expiry >
-      now - 5000
-    );
-
-  console.log(
-    "🔎 CHECK OPEN:",
-    open
-  );
-
-  return open;
+  return votingState.open && (votingState.expiry === 0 || votingState.expiry > now - 5000);
 }
 
-
-// ─────────────────────────────────────────────
-// CHECK GATE
-// ─────────────────────────────────────────────
 async function checkVotingGate() {
-
   await fetchVotingStatus();
-
-  const overlay =
-    document.getElementById(
-      "lockedOverlay"
-    );
-
+  const overlay = document.getElementById("lockedOverlay");
   if (!overlay) return;
-
-  overlay.classList.toggle(
-    "show",
-    !isVotingOpen()
-  );
+  overlay.classList.toggle("show", !isVotingOpen());
 }
 
-
-// ─────────────────────────────────────────────
-// UTILS
-// ─────────────────────────────────────────────
-function normalizeDate(d) {
-
-  const date = new Date(d);
-
-  return isNaN(date)
-    ? null
-    : date.toISOString()
-        .split("T")[0];
-}
-
+// ── UTILS ──
 function showAlert(type, msg) {
-
-  const el =
-    document.getElementById(
-      "alert"
-    );
-
+  const el = document.getElementById("alert");
   if (!el) return;
-
-  el.className =
-    `alert alert-${type} show`;
-
+  el.className = `alert alert-${type} show`;
   el.innerHTML = msg;
 }
 
-
-// ─────────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────────
+// ── NAVIGATION ──
 function goStep(n) {
-
-  // Stop liveness camera when leaving step-4
   const step4El = document.getElementById('step-4');
   if (step4El && step4El.classList.contains('active')) {
     stopLivenessCamera();
   }
-
-  document
-    .querySelectorAll(".form-step")
-    .forEach(s =>
-      s.classList.remove("active")
-    );
-
-  document
-    .getElementById(`step-${n}`)
-    ?.classList.add("active");
-
-  document
-    .querySelectorAll(".step-ind")
-    .forEach((el, i) => {
-
-      el.classList.remove(
-        "active",
-        "done"
-      );
-
-      if (i + 1 < n) {
-        el.classList.add("done");
-      }
-
-      if (i + 1 === n) {
-        el.classList.add("active");
-      }
-    });
-
-  document
-    .querySelectorAll(".step-line")
-    .forEach((el, i) => {
-
-      el.classList.toggle(
-        "done",
-        i + 1 < n
-      );
-    });
-
-  // Start liveness camera when entering step-4
+  document.querySelectorAll(".form-step").forEach(s => s.classList.remove("active"));
+  document.getElementById(`step-${n}`)?.classList.add("active");
+  document.querySelectorAll(".step-ind").forEach((el, i) => {
+    el.classList.remove("active", "done");
+    if (i + 1 < n) el.classList.add("done");
+    if (i + 1 === n) el.classList.add("active");
+  });
+  document.querySelectorAll(".step-line").forEach((el, i) => {
+    el.classList.toggle("done", i + 1 < n);
+  });
   if (n === 4) {
     startLivenessCamera();
   }
 }
 
-
-// ─────────────────────────────────────────────
-// STEP 1
-// ─────────────────────────────────────────────
+// ── STEP 1 ──
 async function goStep2() {
+  const vid = document.getElementById('fVoterId').value.trim();
+  const dob = document.getElementById('fDob').value.trim();
+  const phone = document.getElementById('fPhone').value.replace(/\D/g, "");
+  const btn1 = document.getElementById('btn1');
 
-  const vid =
-    fVoterId.value.trim();
+  if (!vid) return showAlert("e", "❌ Enter voter ID");
 
-  const dob =
-    fDob.value.trim();
-
-  const phone =
-    fPhone.value
-      .replace(/\D/g, "");
-
-  if (!vid) {
-
-    return showAlert(
-      "e",
-      "❌ Enter voter ID"
-    );
-  }
-
-  btn1.textContent =
-    "Checking...";
-
+  btn1.textContent = "Checking...";
   btn1.disabled = true;
 
   try {
+    const res = await fetch(`${API_BASE}/voters/${vid}`);
+    if (!res.ok) return showAlert("e", "❌ Voter not found");
 
-    const res = await fetch(
-      `${API_BASE}/voters/${vid}`
-    );
+    const voter = await res.json();
 
-    if (!res.ok) {
+    if (!voter.dob) return showAlert("e", "❌ DOB missing in system");
+    const dbDOB = voter.dob.substring(0, 10);
+    if (dob !== dbDOB) return showAlert("e", "❌ DOB mismatch");
 
-      return showAlert(
-        "e",
-        "❌ Voter not found"
-      );
-    }
+    if (!voter.mobileNo) return showAlert("e", "❌ Mobile missing");
+    if (phone !== voter.mobileNo) return showAlert("e", "❌ Phone mismatch");
 
-    const voter =
-      await res.json();
-
-    // DOB
-    if (!voter.dob) {
-
-      return showAlert(
-        "e",
-        "❌ DOB missing in system"
-      );
-    }
-
-    const dbDOB =
-      voter.dob.substring(0, 10);
-
-    if (dob !== dbDOB) {
-
-      return showAlert(
-        "e",
-        `❌ DOB mismatch`
-      );
-    }
-
-    // PHONE
-    if (!voter.mobileNo) {
-
-      return showAlert(
-        "e",
-        "❌ Mobile missing"
-      );
-    }
-
-    if (
-      phone !== voter.mobileNo
-    ) {
-
-      return showAlert(
-        "e",
-        "❌ Phone mismatch"
-      );
-    }
-
-    // ALREADY VOTED
-    if (voter.hasVoted) {
-
-      return showAlert(
-        "e",
-        "⚠️ Already voted"
-      );
-    }
+    if (voter.hasVoted) return showAlert("e", "⚠️ Already voted");
 
     verifiedVoter = voter;
-
-    showAlert(
-      "s",
-      `✅ Verified: ${voter.name}`
-    );
-
-    setTimeout(() => {
-
-      sendOtpToVoter(vid);
-
-    }, 500);
+    showAlert("s", `✅ Verified: ${voter.name}`);
+    setTimeout(() => sendOtpToVoter(vid), 500);
 
   } catch (err) {
-
     console.error(err);
-
-    showAlert(
-      "e",
-      "❌ Server error"
-    );
-
+    showAlert("e", "❌ Server error");
   } finally {
-
-    btn1.textContent =
-      "Verify Identity & Send OTP";
-
+    btn1.textContent = "Verify Identity & Send OTP";
     btn1.disabled = false;
   }
 }
 
-
-// ─────────────────────────────────────────────
-// SEND OTP
-// ─────────────────────────────────────────────
+// ── SEND OTP ──
 async function sendOtpToVoter(voterId) {
-
   try {
-
-    const res = await fetch(
-      `${API_BASE}/voters/${voterId}/send-otp`,
-      {
-        method: "POST"
-      }
-    );
-
-    if (!res.ok) {
-
-      return showAlert(
-        "e",
-        "❌ OTP failed"
-      );
-    }
-
+    const res = await fetch(`${API_BASE}/voters/${voterId}/send-otp`, { method: "POST" });
+    if (!res.ok) return showAlert("e", "❌ OTP failed");
     const data = await res.json();
     currentOtp = data.otp;
-
     goStep(2);
-
   } catch {
-
-    showAlert(
-      "e",
-      "❌ OTP error"
-    );
+    showAlert("e", "❌ OTP error");
   }
 }
 
-
-// ─────────────────────────────────────────────
-// VERIFY OTP
-// ─────────────────────────────────────────────
+// ── VERIFY OTP ──
 async function goStep3() {
+  const otp = [...document.querySelectorAll(".otp-digit")].map(i => i.value).join("");
+  const btn2 = document.getElementById('btn2');
 
-  const otp =
-    [...document.querySelectorAll(".otp-digit")]
-      .map(i => i.value)
-      .join("");
+  if (otp.length !== 6) return showAlert("e", "❌ Enter valid 6-digit OTP");
 
-  if (otp.length !== 6) {
-
-    return showAlert(
-      "e",
-      "❌ Enter valid 6-digit OTP"
-    );
-  }
-
-  btn2.textContent =
-    "Verifying...";
-
+  btn2.textContent = "Verifying...";
   btn2.disabled = true;
 
   try {
+    const res = await fetch(`${API_BASE}/voters/${verifiedVoter.voterId}/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ otp: otp })
+    });
 
-    console.log(
-      "📡 Sending OTP verify request..."
-    );
-
-    const res = await fetch(
-      `${API_BASE}/voters/${verifiedVoter.voterId}/verify-otp`,
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-
-        body: JSON.stringify({
-          otp: otp
-        })
-      }
-    );
-
-    console.log(
-      "📥 RESPONSE STATUS:",
-      res.status
-    );
-
-    // try parsing response safely
     let data = null;
+    try { data = await res.json(); } catch { console.warn("⚠️ Non-JSON response"); }
 
-    try {
+    const success = res.ok && (data?.success === true || data?.verified === true || data?.message === "OTP verified successfully");
 
-      data = await res.json();
+    if (!success) return showAlert("e", data?.message || "❌ Invalid OTP");
 
-    } catch {
-
-      console.warn(
-        "⚠️ Non-JSON response"
-      );
-    }
-
-    console.log(
-      "📥 VERIFY RESPONSE:",
-      data
-    );
-
-    // HARD CHECK
-    const success =
-      res.ok &&
-      (
-        data?.success === true ||
-        data?.verified === true ||
-        data?.message === "OTP verified successfully"
-      );
-
-    if (!success) {
-
-      return showAlert(
-        "e",
-        data?.message ||
-        "❌ Invalid OTP"
-      );
-    }
-
-    showAlert(
-      "s",
-      "✅ OTP Verified"
-    );
-
-    console.log(
-      "✅ OTP SUCCESS"
-    );
-
-    setTimeout(() => {
-
-      goStep(3);
-
-    }, 500);
+    showAlert("s", "✅ OTP Verified");
+    setTimeout(() => goStep(3), 500);
 
   } catch (err) {
-
-    console.error(
-      "❌ OTP VERIFY ERROR:",
-      err
-    );
-
-    showAlert(
-      "e",
-      "❌ OTP verification failed"
-    );
-
+    console.error("❌ OTP VERIFY ERROR:", err);
+    showAlert("e", "❌ OTP verification failed");
   } finally {
-
-    btn2.textContent =
-      "Verify OTP";
-
+    btn2.textContent = "Verify OTP";
     btn2.disabled = false;
   }
 }
-// ─────────────────────────────────────────────
-// REAL BIOMETRIC AUTHENTICATION (WebAuthn)
-// ─────────────────────────────────────────────
-async function startBiometricVerification() {
 
+// ── BIOMETRIC ──
+async function startBiometricVerification() {
   const btn = document.getElementById("btn3");
   const skipBtn = document.getElementById("skipBtn");
 
   btn.textContent = "Authenticating...";
   btn.disabled = true;
 
-  // Check if WebAuthn is supported
   if (!window.PublicKeyCredential) {
     showAlert("e", "⚠️ WebAuthn not supported on this browser");
     btn.textContent = "🔒 Verify Biometric";
     btn.disabled = false;
-    if (skipBtn) { skipBtn.style.display = "block"; }
+    if (skipBtn) skipBtn.style.display = "block";
     return;
   }
 
-  // Check if platform authenticator (fingerprint/face) is available
   try {
     const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-
     if (!available) {
       showAlert("i", "ℹ️ No biometric device found — use security key or skip");
       btn.textContent = "🔒 Verify Biometric";
       btn.disabled = false;
-      if (skipBtn) { skipBtn.style.display = "block"; }
+      if (skipBtn) skipBtn.style.display = "block";
       return;
     }
   } catch (checkErr) {
@@ -799,79 +429,50 @@ async function startBiometricVerification() {
 
   try {
     showAlert("i", "🔐 Touch your fingerprint sensor or look at camera...");
-
-    // Generate a challenge (in production this comes from server)
     const challengeBuffer = new Uint8Array(32);
     crypto.getRandomValues(challengeBuffer);
-
     const oderId = verifiedVoter ? verifiedVoter.voterId : "voter";
     const userIdBuffer = new TextEncoder().encode(oderId);
 
-    // WebAuthn credential creation options
     const createOptions = {
       publicKey: {
         challenge: challengeBuffer,
-        rp: {
-          name: "CivicChain Voting Platform",
-          id: window.location.hostname
-        },
-        user: {
-          id: userIdBuffer,
-          name: oderId,
-          displayName: verifiedVoter ? verifiedVoter.name : "Voter"
-        },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7 },   // ES256
-          { type: "public-key", alg: -257 }  // RS256
-        ],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",   // Force built-in biometric
-          userVerification: "required",          // Require fingerprint/face
-          residentKey: "preferred"
-        },
+        rp: { name: "CivicChain Voting Platform", id: window.location.hostname },
+        user: { id: userIdBuffer, name: oderId, displayName: verifiedVoter ? verifiedVoter.name : "Voter" },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
         timeout: 60000,
         attestation: "none"
       }
     };
 
-    // This triggers the real fingerprint/face prompt from the OS
     const credential = await navigator.credentials.create(createOptions);
-
     if (credential) {
       biometricVerified = true;
-
-      // Save voter ID to sessionStorage for vote.html
       if (verifiedVoter && verifiedVoter.voterId) {
         sessionStorage.setItem('voterVid', verifiedVoter.voterId);
         sessionStorage.setItem('voterName', verifiedVoter.name || '');
       }
-
       showAlert("s", "✅ Biometric verified — Access granted");
-
-      setTimeout(() => {
-        goStep(4);
-      }, 800);
+      setTimeout(() => goStep(4), 800);
     }
 
   } catch (err) {
     console.error("Biometric error:", err);
-
     if (err.name === "NotAllowedError") {
       showAlert("e", "❌ Biometric cancelled — try again");
     } else if (err.name === "SecurityError") {
       showAlert("e", "⚠️ Security error — try HTTPS or localhost");
-      if (skipBtn) { skipBtn.style.display = "block"; }
+      if (skipBtn) skipBtn.style.display = "block";
     } else {
       showAlert("e", "❌ Biometric failed: " + (err.message || "Unknown error"));
-      if (skipBtn) { skipBtn.style.display = "block"; }
+      if (skipBtn) skipBtn.style.display = "block";
     }
-
     btn.textContent = "🔒 Verify Biometric";
     btn.disabled = false;
   }
 }
 
-// Fallback skip (only visible if biometrics unavailable)
 function skipBiometric() {
   biometricVerified = true;
   if (verifiedVoter && verifiedVoter.voterId) {
@@ -879,123 +480,42 @@ function skipBiometric() {
     sessionStorage.setItem('voterName', verifiedVoter.name || '');
   }
   showAlert("s", "✅ Access granted (demo bypass)");
-  setTimeout(() => { goStep(4); }, 600);
+  setTimeout(() => goStep(4), 600);
 }
 
-
-// ─────────────────────────────────────────────
-// CURSOR
-// ─────────────────────────────────────────────
+// ── CURSOR ──
 function initCursor() {
-
-  const cursor =
-    document.getElementById(
-      "cursor"
-    );
-
-  const ring =
-    document.getElementById(
-      "cursorRing"
-    );
-
-  if (!cursor || !ring) {
-    return;
-  }
-
-  let x = 0;
-  let y = 0;
-
-  document.addEventListener(
-    "mousemove",
-    e => {
-
-      x = e.clientX;
-      y = e.clientY;
-
-      cursor.style.transform =
-        `translate(${x - 6}px, ${y - 6}px)`;
-
-      ring.style.transform =
-        `translate(${x - 18}px, ${y - 18}px)`;
-    }
-  );
+  const cursor = document.getElementById("cursor");
+  const ring = document.getElementById("cursorRing");
+  if (!cursor || !ring) return;
+  document.addEventListener("mousemove", e => {
+    cursor.style.transform = `translate(${e.clientX - 6}px, ${e.clientY - 6}px)`;
+    ring.style.transform = `translate(${e.clientX - 18}px, ${e.clientY - 18}px)`;
+  });
 }
 
-
-// ─────────────────────────────────────────────
-// OTP INPUTS
-// ─────────────────────────────────────────────
+// ── OTP INPUTS ──
 function setupOtpInputs() {
-
-  document
-    .querySelectorAll(".otp-digit")
-    .forEach((inp, i, arr) => {
-
-      inp.addEventListener(
-        "input",
-        () => {
-
-          inp.value =
-            inp.value.replace(
-              /\D/g,
-              ""
-            );
-
-          if (
-            inp.value &&
-            i < arr.length - 1
-          ) {
-
-            arr[i + 1].focus();
-          }
-        }
-      );
-
-      inp.addEventListener(
-        "keydown",
-        e => {
-
-          if (
-            e.key === "Backspace" &&
-            !inp.value &&
-            i > 0
-          ) {
-
-            arr[i - 1].focus();
-          }
-        }
-      );
+  document.querySelectorAll(".otp-digit").forEach((inp, i, arr) => {
+    inp.addEventListener("input", () => {
+      inp.value = inp.value.replace(/\D/g, "");
+      if (inp.value && i < arr.length - 1) arr[i + 1].focus();
     });
+    inp.addEventListener("keydown", e => {
+      if (e.key === "Backspace" && !inp.value && i > 0) arr[i - 1].focus();
+    });
+  });
 }
 
+// ── INIT ──
+document.addEventListener("DOMContentLoaded", async () => {
+  initCursor();
+  setupOtpInputs();
+  await checkVotingGate();
+  setInterval(checkVotingGate, 3000);
+});
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-document.addEventListener(
-  "DOMContentLoaded",
-  async () => {
-
-    console.log(
-      "🚀 Login page initialized"
-    );
-
-    initCursor();
-
-    setupOtpInputs();
-
-    await checkVotingGate();
-
-    setInterval(
-      checkVotingGate,
-      3000
-    );
-  }
-);
-
-// ─────────────────────────────────────────────
-// LIVENESS CHECK (STEP 4)
-// ─────────────────────────────────────────────
+// ── LIVENESS CHECK ──
 let blinkDetected = false;
 let consecutiveClosedFrames = 0;
 let livenessInterval = null;
@@ -1006,21 +526,18 @@ const LEFT_EYE = [362, 385, 387, 263, 373, 380];
 const RIGHT_EYE = [33, 160, 158, 133, 153, 144];
 
 function calculateEAR(landmarks, eyeIndices) {
-  const p1 = { x: landmarks[eyeIndices[0]].x, y: landmarks[eyeIndices[0]].y };
-  const p2 = { x: landmarks[eyeIndices[1]].x, y: landmarks[eyeIndices[1]].y };
-  const p3 = { x: landmarks[eyeIndices[2]].x, y: landmarks[eyeIndices[2]].y };
-  const p4 = { x: landmarks[eyeIndices[3]].x, y: landmarks[eyeIndices[3]].y };
-  const p5 = { x: landmarks[eyeIndices[4]].x, y: landmarks[eyeIndices[4]].y };
-  const p6 = { x: landmarks[eyeIndices[5]].x, y: landmarks[eyeIndices[5]].y };
-  const v1 = Math.hypot(p2.x - p6.x, p2.y - p6.y);
-  const v2 = Math.hypot(p3.x - p5.x, p3.y - p5.y);
-  const h = Math.hypot(p1.x - p4.x, p1.y - p4.y);
+  const p = eyeIndices.map(i => ({ x: landmarks[i].x, y: landmarks[i].y }));
+  const v1 = Math.hypot(p[1].x - p[5].x, p[1].y - p[5].y);
+  const v2 = Math.hypot(p[2].x - p[4].x, p[2].y - p[4].y);
+  const h  = Math.hypot(p[0].x - p[3].x, p[0].y - p[3].y);
   return (v1 + v2) / (2.0 * h);
 }
 
-function startLivenessCamera() {
+// FIX: async function so await works inside
+async function startLivenessCamera() {
   blinkDetected = false;
   consecutiveClosedFrames = 0;
+
   document.getElementById('liveness-timer').textContent = '10';
   document.getElementById('liveness-instruction').textContent = '👁️ BLINK NOW';
   document.getElementById('liveness-instruction').style.animation = 'pulse 1.5s infinite';
@@ -1032,9 +549,7 @@ function startLivenessCamera() {
   livenessInterval = setInterval(() => {
     seconds--;
     document.getElementById('liveness-timer').textContent = seconds;
-    if (seconds <= 0 && !blinkDetected) {
-      livenessFail();
-    }
+    if (seconds <= 0 && !blinkDetected) livenessFail();
   }, 1000);
 
   try {
@@ -1081,61 +596,42 @@ function startLivenessCamera() {
       }
     });
 
-    // livenessCamera = new Camera(video, {
-    //   onFrame: async () => {
-    //     await livenessFaceMesh.send({ image: video });
-    //   },
-    //   width: 320,
-    //   height: 240
-    // });
-
+    // FIX: await getUserMedia properly inside async function
     const stream = await navigator.mediaDevices.getUserMedia({
-  video: { width: 320, height: 240, facingMode: 'user' }
-});
-video.srcObject = stream;
+      video: { width: 320, height: 240, facingMode: 'user' }
+    });
+    video.srcObject = stream;
 
-livenessCamera = new Camera(video, {
-  onFrame: async () => {
-    await livenessFaceMesh.send({ image: video });
-  },
-  width: 320,
-  height: 240
-});
-    
+    livenessCamera = new Camera(video, {
+      onFrame: async () => {
+        await livenessFaceMesh.send({ image: video });
+      },
+      width: 320,
+      height: 240
+    });
+
     livenessCamera.start();
-  // }catch (err) {
-  //   console.error('Camera error:', err);
-  //   document.getElementById('liveness-status').textContent = '❌ Camera error';
-  // }
-    } catch (err) {
-  console.error('Camera error:', err);
-  if (err.name === 'NotReadableError') {
-    document.getElementById('liveness-status').textContent = '❌ Camera in use — close other apps and retry';
-    setTimeout(() => { goStep(5); }, 3000);
-  } else if (err.name === 'NotAllowedError') {
-    document.getElementById('liveness-status').textContent = '❌ Camera permission denied';
-    setTimeout(() => { goStep(5); }, 3000);
-  } else {
-    document.getElementById('liveness-status').textContent = '❌ Camera error — skipping';
-    setTimeout(() => { goStep(5); }, 3000);
-  }
-}
-}
-  
-function stopLivenessCamera() {
-  if (livenessInterval) {
+
+  } catch (err) {
+    console.error('Camera error:', err);
+    if (err.name === 'NotReadableError') {
+      statusEl.textContent = '❌ Camera in use — close other apps and retry';
+    } else if (err.name === 'NotAllowedError') {
+      statusEl.textContent = '❌ Camera permission denied';
+    } else {
+      statusEl.textContent = '❌ Camera error — skipping liveness';
+    }
     clearInterval(livenessInterval);
-    livenessInterval = null;
+    setTimeout(() => goStep(5), 3000);
   }
-  if (livenessCamera) {
-    try { livenessCamera.stop(); } catch (e) { /* ignore */ }
-    livenessCamera = null;
-  }
+}
+
+function stopLivenessCamera() {
+  if (livenessInterval) { clearInterval(livenessInterval); livenessInterval = null; }
+  if (livenessCamera) { try { livenessCamera.stop(); } catch (e) {} livenessCamera = null; }
   const video = document.getElementById('liveness-video');
   if (video && video.srcObject) {
-    try {
-      video.srcObject.getTracks().forEach(t => t.stop());
-    } catch (e) { /* ignore */ }
+    try { video.srcObject.getTracks().forEach(t => t.stop()); } catch (e) {}
     video.srcObject = null;
   }
   livenessFaceMesh = null;
@@ -1159,9 +655,7 @@ function livenessFail() {
   setTimeout(() => { window.location.href = 'index.html'; }, 2000);
 }
 
-// ─────────────────────────────────────────────
-// WALLET (STEP 5)
-// ─────────────────────────────────────────────
+// ── WALLET ──
 async function connectWallet() {
   if (typeof window.ethereum === 'undefined') {
     showAlert('e', '❌ MetaMask not detected. Please install MetaMask.');
@@ -1169,8 +663,8 @@ async function connectWallet() {
   }
   try {
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const statusEl = document.getElementById('walletStatus');
     const addr = accounts[0];
+    const statusEl = document.getElementById('walletStatus');
     statusEl.textContent = `✅ Connected: ${addr.substring(0,6)}...${addr.substring(38)}`;
     statusEl.classList.add('show');
     showAlert('s', '✅ Wallet connected successfully');
