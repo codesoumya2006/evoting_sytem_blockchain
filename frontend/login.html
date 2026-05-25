@@ -1103,9 +1103,21 @@ livenessCamera = new Camera(video, {
 });
     
     livenessCamera.start();
-  } catch (err) {
-    console.error('Camera error:', err);
-    document.getElementById('liveness-status').textContent = '❌ Camera error';
+  // }catch (err) {
+  //   console.error('Camera error:', err);
+  //   document.getElementById('liveness-status').textContent = '❌ Camera error';
+  // }
+    } catch (err) {
+  console.error('Camera error:', err);
+  if (err.name === 'NotReadableError') {
+    document.getElementById('liveness-status').textContent = '❌ Camera in use — close other apps and retry';
+    setTimeout(() => { goStep(5); }, 3000);
+  } else if (err.name === 'NotAllowedError') {
+    document.getElementById('liveness-status').textContent = '❌ Camera permission denied';
+    setTimeout(() => { goStep(5); }, 3000);
+  } else {
+    document.getElementById('liveness-status').textContent = '❌ Camera error — skipping';
+    setTimeout(() => { goStep(5); }, 3000);
   }
 }
 
