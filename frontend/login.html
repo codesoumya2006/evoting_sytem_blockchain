@@ -6,9 +6,7 @@
 <title>CivicChain — Voter Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
   :root{--bg:#030712;--surface:#0d1117;--border:#1e2936;--accent:#00e5ff;--text:#e2e8f0;--muted:#64748b;--success:#10b981;--error:#ef4444;--warning:#f59e0b;}
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -515,162 +513,157 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(checkVotingGate, 3000);
 });
 
-// ── LIVENESS CHECK ──
+
+
+// ── LIVENESS CHECK (face-api.js) ──
 let blinkDetected = false;
-let consecutiveClosedFrames = 0;
 let livenessInterval = null;
-let livenessFaceMesh = null;
 let livenessStream = null;
 let livenessRAF = null;
 let livenessRunning = false;
+let faceApiLoaded = false;
 
-const LEFT_EYE = [362, 385, 387, 263, 373, 380];
-const RIGHT_EYE = [33, 160, 158, 133, 153, 144];
-
-function calculateEAR(landmarks, eyeIndices) {
-  const p = eyeIndices.map(i => ({ x: landmarks[i].x, y: landmarks[i].y }));
-  const v1 = Math.hypot(p[1].x - p[5].x, p[1].y - p[5].y);
-  const v2 = Math.hypot(p[2].x - p[4].x, p[2].y - p[4].y);
-  const h  = Math.hypot(p[0].x - p[3].x, p[0].y - p[3].y);
+// EAR calculation using face-api.js 68-point landmarks
+// Left eye points: 36,37,38,39,40,41
+// Right eye points: 42,43,44,45,46,47
+function getEAR(eyePoints) {
+  const v1 = Math.hypot(eyePoints[1].x - eyePoints[5].x, eyePoints[1].y - eyePoints[5].y);
+  const v2 = Math.hypot(eyePoints[2].x - eyePoints[4].x, eyePoints[2].y - eyePoints[4].y);
+  const h  = Math.hypot(eyePoints[0].x - eyePoints[3].x, eyePoints[0].y - eyePoints[3].y);
   return (v1 + v2) / (2.0 * h);
 }
 
+async function loadFaceApi() {
+  if (faceApiLoaded) return true;
+  try {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
+    ]);
+    faceApiLoaded = true;
+    return true;
+  } catch (e) {
+    console.error('face-api load error:', e);
+    return false;
+  }
+}
+
 async function startLivenessCamera() {
-  // reset state
   blinkDetected = false;
-  consecutiveClosedFrames = 0;
   livenessRunning = false;
 
-  const timerEl = document.getElementById('liveness-timer');
-  const instrEl = document.getElementById('liveness-instruction');
+  const timerEl  = document.getElementById('liveness-timer');
+  const instrEl  = document.getElementById('liveness-instruction');
   const statusEl = document.getElementById('liveness-status');
-  const video = document.getElementById('liveness-video');
-  const canvas = document.getElementById('liveness-canvas');
-  const ctx = canvas.getContext('2d');
+  const video    = document.getElementById('liveness-video');
+  const canvas   = document.getElementById('liveness-canvas');
+  const ctx      = canvas.getContext('2d');
 
-  timerEl.textContent = '10';
-  instrEl.textContent = '⏳ Starting camera...';
+  timerEl.textContent  = '10';
+  instrEl.textContent  = '⏳ Starting camera...';
   instrEl.style.animation = 'none';
   statusEl.textContent = '';
   statusEl.style.color = '';
 
-  // STEP 1: Get camera stream first
+  // 1. Camera
   try {
     livenessStream = await navigator.mediaDevices.getUserMedia({
       video: { width: 320, height: 240, facingMode: 'user' }
     });
     video.srcObject = livenessStream;
-    video.style.display = 'none';
-
-    // Wait for video to be ready
-    await new Promise((resolve, reject) => {
-      video.onloadedmetadata = () => resolve();
-      video.onerror = () => reject(new Error('Video load error'));
-      setTimeout(reject, 5000, new Error('Video timeout'));
+    video.style.display = 'block';
+    video.style.position = 'absolute';
+    video.style.opacity = '0';
+    await new Promise((res, rej) => {
+      video.onloadedmetadata = res;
+      setTimeout(rej, 6000, new Error('timeout'));
     });
-
     await video.play();
-
   } catch (err) {
-    console.error('Camera access error:', err);
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      statusEl.textContent = '❌ Camera permission denied — allow camera and retry';
-    } else if (err.name === 'NotReadableError') {
-      statusEl.textContent = '❌ Camera in use by another app — close it and retry';
-    } else {
-      statusEl.textContent = '❌ Camera not available — skipping liveness';
-    }
-    instrEl.textContent = '⚠️ Camera Error';
+    console.error('Camera error:', err);
+    statusEl.textContent = err.name === 'NotAllowedError'
+      ? '❌ Camera permission denied'
+      : '❌ Camera error — skipping';
+    instrEl.textContent = '⚠️ Error';
     setTimeout(() => goStep(5), 3000);
     return;
   }
 
-  // STEP 2: Load FaceMesh
-  try {
-    statusEl.textContent = 'Loading face detection...';
-    livenessFaceMesh = new FaceMesh({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-    });
-    livenessFaceMesh.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
-
-    // Warm up FaceMesh with first frame
-    await new Promise((resolve, reject) => {
-      livenessFaceMesh.onResults(() => resolve());
-      livenessFaceMesh.send({ image: video }).catch(reject);
-      setTimeout(resolve, 3000); // don't wait forever
-    });
-
-  } catch (err) {
-    console.error('FaceMesh load error:', err);
-    statusEl.textContent = '❌ Face detection failed — skipping liveness';
-    instrEl.textContent = '⚠️ Error';
+  // 2. Load face-api models
+  instrEl.textContent = '⏳ Loading face models...';
+  statusEl.textContent = 'Please wait...';
+  const ok = await loadFaceApi();
+  if (!ok) {
+    statusEl.textContent = '❌ Model load failed — skipping';
     stopLivenessCamera();
     setTimeout(() => goStep(5), 3000);
     return;
   }
 
-  // STEP 3: Start detection loop
-  statusEl.textContent = '';
+  // 3. Start detection
   instrEl.textContent = '👁️ BLINK NOW';
   instrEl.style.animation = 'pulse 1.5s infinite';
+  statusEl.textContent = 'Look at the camera';
   livenessRunning = true;
 
-  // Set FaceMesh results handler
-  livenessFaceMesh.onResults((results) => {
+  let eyeWasClosed = false;
+  let closedFrames = 0;
+
+  async function detect() {
     if (!livenessRunning) return;
 
-    // Draw mirrored video on canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Draw mirrored video
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-      statusEl.textContent = '👤 Face detected';
-      const landmarks = results.multiFaceLandmarks[0];
-      const leftEAR = calculateEAR(landmarks, LEFT_EYE);
-      const rightEAR = calculateEAR(landmarks, RIGHT_EYE);
-      const avgEAR = (leftEAR + rightEAR) / 2;
-
-      if (avgEAR < 0.15) {
-        consecutiveClosedFrames++;
-      } else {
-        if (consecutiveClosedFrames >= 2 && !blinkDetected) {
-          blinkDetected = true;
-          livenessRunning = false;
-          livenessPass();
-          return;
-        }
-        consecutiveClosedFrames = 0;
-      }
-    } else {
-      statusEl.textContent = '⚠️ No face — look at camera';
-    }
-  });
-
-  // requestAnimationFrame loop — reliable frame sending
-  async function processFrame() {
-    if (!livenessRunning) return;
     try {
-      if (video.readyState >= 2) {
-        await livenessFaceMesh.send({ image: video });
+      const detection = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160 }))
+        .withFaceLandmarks(true);
+
+      if (detection) {
+        const pts = detection.landmarks.positions;
+        // left eye: 36-41, right eye: 42-47
+        const leftEye  = [pts[36],pts[37],pts[38],pts[39],pts[40],pts[41]];
+        const rightEye = [pts[42],pts[43],pts[44],pts[45],pts[46],pts[47]];
+        const ear = (getEAR(leftEye) + getEAR(rightEye)) / 2;
+
+        statusEl.textContent = `👤 Face detected | EAR: ${ear.toFixed(3)}`;
+
+        if (ear < 0.20) {
+          closedFrames++;
+          eyeWasClosed = true;
+        } else {
+          if (eyeWasClosed && closedFrames >= 1 && !blinkDetected) {
+            blinkDetected = true;
+            livenessRunning = false;
+            livenessPass();
+            return;
+          }
+          eyeWasClosed = false;
+          closedFrames = 0;
+        }
+      } else {
+        statusEl.textContent = '⚠️ No face — look at camera';
+        closedFrames = 0;
+        eyeWasClosed = false;
       }
     } catch (e) {
-      console.warn('Frame error:', e);
+      console.warn('Detection error:', e);
     }
-    livenessRAF = requestAnimationFrame(processFrame);
-  }
-  livenessRAF = requestAnimationFrame(processFrame);
 
-  // Start countdown timer
-  let seconds = 10;
+    livenessRAF = requestAnimationFrame(detect);
+  }
+
+  livenessRAF = requestAnimationFrame(detect);
+
+  // Timer
+  let seconds = 15;
+  timerEl.textContent = seconds;
   livenessInterval = setInterval(() => {
     if (!livenessRunning) return;
     seconds--;
@@ -691,17 +684,16 @@ function stopLivenessCamera() {
     livenessStream = null;
   }
   const video = document.getElementById('liveness-video');
-  if (video) { video.srcObject = null; }
-  livenessFaceMesh = null;
+  if (video) { video.srcObject = null; video.style.display = 'none'; }
 }
 
 function livenessPass() {
   stopLivenessCamera();
   const statusEl = document.getElementById('liveness-status');
-  const instrEl = document.getElementById('liveness-instruction');
+  const instrEl  = document.getElementById('liveness-instruction');
   statusEl.textContent = '✅ LIVENESS VERIFIED';
-  statusEl.style.color = '#10b981';
-  instrEl.textContent = '✅ Blink Detected!';
+  statusEl.style.color  = '#10b981';
+  instrEl.textContent   = '✅ Blink Detected!';
   instrEl.style.animation = 'none';
   document.getElementById('liveness-timer').textContent = '✓';
   setTimeout(() => goStep(5), 1500);
@@ -711,7 +703,7 @@ function livenessFail() {
   stopLivenessCamera();
   const statusEl = document.getElementById('liveness-status');
   statusEl.textContent = '❌ LIVENESS FAILED — Redirecting...';
-  statusEl.style.color = '#ef4444';
+  statusEl.style.color  = '#ef4444';
   setTimeout(() => { window.location.href = 'index.html'; }, 2000);
 }
 
