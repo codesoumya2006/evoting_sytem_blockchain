@@ -519,8 +519,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 let blinkDetected = false;
 let consecutiveClosedFrames = 0;
 let livenessInterval = null;
-let livenessCamera = null;
 let livenessFaceMesh = null;
+let livenessStream = null;
+let livenessRAF = null;
+let livenessRunning = false;
 
 const LEFT_EYE = [362, 385, 387, 263, 373, 380];
 const RIGHT_EYE = [33, 160, 158, 133, 153, 144];
@@ -533,30 +535,62 @@ function calculateEAR(landmarks, eyeIndices) {
   return (v1 + v2) / (2.0 * h);
 }
 
-// FIX: async function so await works inside
 async function startLivenessCamera() {
+  // reset state
   blinkDetected = false;
   consecutiveClosedFrames = 0;
+  livenessRunning = false;
 
-  document.getElementById('liveness-timer').textContent = '10';
-  document.getElementById('liveness-instruction').textContent = '👁️ BLINK NOW';
-  document.getElementById('liveness-instruction').style.animation = 'pulse 1.5s infinite';
+  const timerEl = document.getElementById('liveness-timer');
+  const instrEl = document.getElementById('liveness-instruction');
   const statusEl = document.getElementById('liveness-status');
+  const video = document.getElementById('liveness-video');
+  const canvas = document.getElementById('liveness-canvas');
+  const ctx = canvas.getContext('2d');
+
+  timerEl.textContent = '10';
+  instrEl.textContent = '⏳ Starting camera...';
+  instrEl.style.animation = 'none';
   statusEl.textContent = '';
   statusEl.style.color = '';
 
-  let seconds = 10;
-  livenessInterval = setInterval(() => {
-    seconds--;
-    document.getElementById('liveness-timer').textContent = seconds;
-    if (seconds <= 0 && !blinkDetected) livenessFail();
-  }, 1000);
-
+  // STEP 1: Get camera stream first
   try {
+    livenessStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 320, height: 240, facingMode: 'user' }
+    });
+    video.srcObject = livenessStream;
+    video.style.display = 'none';
+
+    // Wait for video to be ready
+    await new Promise((resolve, reject) => {
+      video.onloadedmetadata = () => resolve();
+      video.onerror = () => reject(new Error('Video load error'));
+      setTimeout(reject, 5000, new Error('Video timeout'));
+    });
+
+    await video.play();
+
+  } catch (err) {
+    console.error('Camera access error:', err);
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      statusEl.textContent = '❌ Camera permission denied — allow camera and retry';
+    } else if (err.name === 'NotReadableError') {
+      statusEl.textContent = '❌ Camera in use by another app — close it and retry';
+    } else {
+      statusEl.textContent = '❌ Camera not available — skipping liveness';
+    }
+    instrEl.textContent = '⚠️ Camera Error';
+    setTimeout(() => goStep(5), 3000);
+    return;
+  }
+
+  // STEP 2: Load FaceMesh
+  try {
+    statusEl.textContent = 'Loading face detection...';
     livenessFaceMesh = new FaceMesh({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
     });
-
     livenessFaceMesh.setOptions({
       maxNumFaces: 1,
       refineLandmarks: true,
@@ -564,86 +598,112 @@ async function startLivenessCamera() {
       minTrackingConfidence: 0.5
     });
 
-    const canvas = document.getElementById('liveness-canvas');
-    const ctx = canvas.getContext('2d');
-    const video = document.getElementById('liveness-video');
-
-    livenessFaceMesh.onResults((results) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-      ctx.restore();
-
-      if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-        const landmarks = results.multiFaceLandmarks[0];
-        const leftEAR = calculateEAR(landmarks, LEFT_EYE);
-        const rightEAR = calculateEAR(landmarks, RIGHT_EYE);
-        const avgEAR = (leftEAR + rightEAR) / 2;
-
-        if (avgEAR < 0.15) {
-          consecutiveClosedFrames++;
-        } else {
-          if (consecutiveClosedFrames >= 2) {
-            blinkDetected = true;
-            livenessPass();
-            return;
-          }
-          consecutiveClosedFrames = 0;
-        }
-      } else {
-        document.getElementById('liveness-status').textContent = 'No face detected';
-      }
+    // Warm up FaceMesh with first frame
+    await new Promise((resolve, reject) => {
+      livenessFaceMesh.onResults(() => resolve());
+      livenessFaceMesh.send({ image: video }).catch(reject);
+      setTimeout(resolve, 3000); // don't wait forever
     });
-
-    // FIX: await getUserMedia properly inside async function
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 320, height: 240, facingMode: 'user' }
-    });
-    video.srcObject = stream;
-
-    livenessCamera = new Camera(video, {
-      onFrame: async () => {
-        await livenessFaceMesh.send({ image: video });
-      },
-      width: 320,
-      height: 240
-    });
-
-    livenessCamera.start();
 
   } catch (err) {
-    console.error('Camera error:', err);
-    if (err.name === 'NotReadableError') {
-      statusEl.textContent = '❌ Camera in use — close other apps and retry';
-    } else if (err.name === 'NotAllowedError') {
-      statusEl.textContent = '❌ Camera permission denied';
-    } else {
-      statusEl.textContent = '❌ Camera error — skipping liveness';
-    }
-    clearInterval(livenessInterval);
+    console.error('FaceMesh load error:', err);
+    statusEl.textContent = '❌ Face detection failed — skipping liveness';
+    instrEl.textContent = '⚠️ Error';
+    stopLivenessCamera();
     setTimeout(() => goStep(5), 3000);
+    return;
   }
+
+  // STEP 3: Start detection loop
+  statusEl.textContent = '';
+  instrEl.textContent = '👁️ BLINK NOW';
+  instrEl.style.animation = 'pulse 1.5s infinite';
+  livenessRunning = true;
+
+  // Set FaceMesh results handler
+  livenessFaceMesh.onResults((results) => {
+    if (!livenessRunning) return;
+
+    // Draw mirrored video on canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+      statusEl.textContent = '👤 Face detected';
+      const landmarks = results.multiFaceLandmarks[0];
+      const leftEAR = calculateEAR(landmarks, LEFT_EYE);
+      const rightEAR = calculateEAR(landmarks, RIGHT_EYE);
+      const avgEAR = (leftEAR + rightEAR) / 2;
+
+      if (avgEAR < 0.15) {
+        consecutiveClosedFrames++;
+      } else {
+        if (consecutiveClosedFrames >= 2 && !blinkDetected) {
+          blinkDetected = true;
+          livenessRunning = false;
+          livenessPass();
+          return;
+        }
+        consecutiveClosedFrames = 0;
+      }
+    } else {
+      statusEl.textContent = '⚠️ No face — look at camera';
+    }
+  });
+
+  // requestAnimationFrame loop — reliable frame sending
+  async function processFrame() {
+    if (!livenessRunning) return;
+    try {
+      if (video.readyState >= 2) {
+        await livenessFaceMesh.send({ image: video });
+      }
+    } catch (e) {
+      console.warn('Frame error:', e);
+    }
+    livenessRAF = requestAnimationFrame(processFrame);
+  }
+  livenessRAF = requestAnimationFrame(processFrame);
+
+  // Start countdown timer
+  let seconds = 10;
+  livenessInterval = setInterval(() => {
+    if (!livenessRunning) return;
+    seconds--;
+    timerEl.textContent = seconds;
+    if (seconds <= 0 && !blinkDetected) {
+      livenessRunning = false;
+      livenessFail();
+    }
+  }, 1000);
 }
 
 function stopLivenessCamera() {
+  livenessRunning = false;
+  if (livenessRAF) { cancelAnimationFrame(livenessRAF); livenessRAF = null; }
   if (livenessInterval) { clearInterval(livenessInterval); livenessInterval = null; }
-  if (livenessCamera) { try { livenessCamera.stop(); } catch (e) {} livenessCamera = null; }
-  const video = document.getElementById('liveness-video');
-  if (video && video.srcObject) {
-    try { video.srcObject.getTracks().forEach(t => t.stop()); } catch (e) {}
-    video.srcObject = null;
+  if (livenessStream) {
+    try { livenessStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+    livenessStream = null;
   }
+  const video = document.getElementById('liveness-video');
+  if (video) { video.srcObject = null; }
   livenessFaceMesh = null;
 }
 
 function livenessPass() {
   stopLivenessCamera();
   const statusEl = document.getElementById('liveness-status');
+  const instrEl = document.getElementById('liveness-instruction');
   statusEl.textContent = '✅ LIVENESS VERIFIED';
   statusEl.style.color = '#10b981';
-  document.getElementById('liveness-instruction').textContent = '✅ Verified';
-  document.getElementById('liveness-instruction').style.animation = 'none';
+  instrEl.textContent = '✅ Blink Detected!';
+  instrEl.style.animation = 'none';
+  document.getElementById('liveness-timer').textContent = '✓';
   setTimeout(() => goStep(5), 1500);
 }
 
